@@ -65,6 +65,8 @@ class YeonsamView(discord.ui.View):
         if is_admin:
             self.add_item(EditButton(guild_id))
 
+        self.add_item(ProfileButton())  # 🔥 추가
+
 
 class EditButton(discord.ui.Button):
     def __init__(self, guild_id):
@@ -73,6 +75,42 @@ class EditButton(discord.ui.Button):
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.send_modal(EditModal(self.guild_id))
+
+
+# 프로필 편집 버튼
+class ProfileButton(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="서버 프로필 변경", style=discord.ButtonStyle.secondary)
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(ProfileModal())
+
+# 프로필 Modal
+class ProfileModal(discord.ui.Modal):
+    def __init__(self):
+        super().__init__(title="서버 프로필 변경")
+
+        self.nickname = discord.ui.TextInput(
+            label="닉네임",
+            placeholder="새 닉네임 입력"
+        )
+
+        self.add_item(self.nickname)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        try:
+            await interaction.user.edit(nick=self.nickname.value)
+
+            await interaction.response.send_message(
+                f"닉네임이 '{self.nickname.value}'로 변경됨",
+                ephemeral=True
+            )
+
+        except Exception as e:
+            await interaction.response.send_message(
+                "닉네임 변경 실패 (권한 확인 필요)",
+                ephemeral=True
+            )
 
 
 # 🔹 메인 Cog
