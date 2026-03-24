@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 from utils.profile import update_member_nickname
-from utils.storage import get_guild
+from utils.welcome_message import build_welcome_embed
 
 
 class ProfileButton(discord.ui.Button):
@@ -44,19 +44,11 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        config = get_guild(member.guild.id)
-        message = config["welcome_message"].replace("{server}", member.guild.name)
-
         channel = member.guild.system_channel
         if channel is None:
             return
 
-        embed = discord.Embed(
-            title="Welcome",
-            description=f"{member.mention}\n{message}",
-            color=0x5865F2,
-        )
-
+        embed = build_welcome_embed(member.guild, member)
         await channel.send(embed=embed, view=WelcomeView())
 
 

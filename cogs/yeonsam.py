@@ -1,8 +1,10 @@
 import discord
 from discord.ext import commands
 
+from cogs.welcome import WelcomeView
 from utils.profile import update_member_nickname
 from utils.storage import get_guild, update_guild
+from utils.welcome_message import build_welcome_embed
 
 
 class EditModal(discord.ui.Modal):
@@ -121,6 +123,28 @@ class Yeonsam(commands.Cog):
         await interaction.response.send_message(
             embed=embed,
             view=YeonsamView(guild.id, is_admin),
+            ephemeral=True,
+        )
+
+    @discord.app_commands.command(
+        name="yeonsam-debug",
+        description="Show the same welcome screen used for new members",
+    )
+    async def yeonsam_debug(self, interaction: discord.Interaction):
+        guild = interaction.guild
+        member = interaction.user
+
+        if guild is None or not isinstance(member, discord.Member):
+            await interaction.response.send_message(
+                "This command can only be used inside a server.",
+                ephemeral=True,
+            )
+            return
+
+        embed = build_welcome_embed(guild, member)
+        await interaction.response.send_message(
+            embed=embed,
+            view=WelcomeView(),
             ephemeral=True,
         )
 
